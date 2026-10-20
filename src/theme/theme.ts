@@ -1,18 +1,11 @@
 import type { ThemeConfig } from 'antd';
 
-/**
- * Common font family utilizing the self-hosted Vazirmatn font.
- */
 export const VAZIRMATN_FONT = "'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
-/**
- * Light theme configuration for Ant Design 5.
- * Calm, minimal aesthetic with neutral grays and an indigo/blue primary accent.
- */
-export const lightTheme: ThemeConfig = {
+export const appTheme: ThemeConfig = {
   token: {
     fontFamily: VAZIRMATN_FONT,
-    colorPrimary: '#2563eb', // Indigo / Modern Blue
+    colorPrimary: '#2563eb',
     colorInfo: '#2563eb',
     colorSuccess: '#16a34a',
     colorWarning: '#d97706',
@@ -25,7 +18,7 @@ export const lightTheme: ThemeConfig = {
     colorBorderSecondary: '#f1f5f9',
     borderRadius: 8,
     borderRadiusSM: 6,
-    borderRadiusLG: 12,
+    borderRadiusLG: 10,
     fontSize: 14,
     wireframe: false,
   },
@@ -45,7 +38,7 @@ export const lightTheme: ThemeConfig = {
       controlHeight: 38,
     },
     Card: {
-      borderRadiusLG: 12,
+      borderRadiusLG: 10,
       colorBorderSecondary: '#e2e8f0',
     },
     Table: {
@@ -64,22 +57,7 @@ export const lightTheme: ThemeConfig = {
       bodyBg: '#f8fafc',
     },
     Modal: {
-      borderRadiusLG: 12,
+      borderRadiusLG: 10,
     },
   },
 };
-
-/**
- * Placeholder structure for dark theme (to be expanded in Phase 5).
- */
-export const darkTheme: ThemeConfig = {
-  ...lightTheme,
-  token: {
-    ...lightTheme.token,
-    colorBgBase: '#0f172a',
-    colorBgLayout: '#020617',
-    colorTextBase: '#f8fafc',
-  },
-};
-
-export const appTheme = lightTheme;

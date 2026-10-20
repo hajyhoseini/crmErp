@@ -15,14 +15,13 @@ export function App() {
         defaultOptions: {
           queries: {
             retry: (failureCount, error) => {
-              // Never retry on 401 Unauthorized
               if (error instanceof ApiError && error.status === 401) {
                 return false;
               }
               return failureCount < 1;
             },
             refetchOnWindowFocus: false,
-            staleTime: 30 * 1000, // 30 seconds
+            staleTime: 30000,
           },
         },
       }),

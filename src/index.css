@@ -6,13 +6,20 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  direction: rtl;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  direction: rtl;
   background-color: #f8fafc;
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
@@ -29,14 +36,11 @@ button, input, select, textarea {
   flex-direction: column;
 }
 
-/* LTR utility for emails, phone numbers, URLs, and code */
-.ltr-input,
-.ltr-text {
+.ltr-input {
   direction: ltr !important;
-  text-align: left !important;
+  text-align: start !important;
 }
 
-/* Clean scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

@@ -1,13 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { ProtectedRoute } from './auth/ProtectedRoute';
+import { Can } from './auth/Can';
 import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { CompaniesPage } from './pages/CompaniesPage';
-import { ContactsPage } from './pages/ContactsPage';
-import { DealsPage } from './pages/DealsPage';
-import { ActivitiesPage } from './pages/ActivitiesPage';
+import { HomePage } from './pages/HomePage';
+import { PlaceholderPage } from './pages/PlaceholderPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { ForbiddenState } from './components/ForbiddenState';
+import { fa } from './i18n/fa';
 
 export const router = createBrowserRouter([
   {
@@ -24,23 +24,55 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <DashboardPage />,
+        element: <HomePage />,
       },
       {
-        path: 'companies',
-        element: <CompaniesPage />,
+        path: 'processes',
+        element: (
+          <Can snippet="pm.process-designer.use" fallback={<ForbiddenState />}>
+            <PlaceholderPage title={fa.nav.processes} />
+          </Can>
+        ),
       },
       {
-        path: 'contacts',
-        element: <ContactsPage />,
+        path: 'knowledge',
+        element: (
+          <Can snippet="pm.knowledge.manage" fallback={<ForbiddenState />}>
+            <PlaceholderPage title={fa.nav.knowledge} />
+          </Can>
+        ),
       },
       {
-        path: 'deals',
-        element: <DealsPage />,
+        path: 'positions',
+        element: (
+          <Can snippet="pm.organization.positions" fallback={<ForbiddenState />}>
+            <PlaceholderPage title={fa.nav.positions} />
+          </Can>
+        ),
       },
       {
-        path: 'activities',
-        element: <ActivitiesPage />,
+        path: 'external-sync',
+        element: (
+          <Can snippet="pm.external-data.sync" fallback={<ForbiddenState />}>
+            <PlaceholderPage title={fa.nav.externalSync} />
+          </Can>
+        ),
+      },
+      {
+        path: 'settings/knowledge',
+        element: (
+          <Can snippet="pm.knowledge.settings" fallback={<ForbiddenState />}>
+            <PlaceholderPage title={fa.nav.knowledgeSettings} />
+          </Can>
+        ),
+      },
+      {
+        path: 'speech',
+        element: (
+          <Can snippet="pm.speech.settings" fallback={<ForbiddenState />}>
+            <PlaceholderPage title={fa.nav.speech} />
+          </Can>
+        ),
       },
     ],
   },

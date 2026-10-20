@@ -14,7 +14,6 @@ export const NotFoundPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        direction: 'rtl',
       }}
     >
       <Result

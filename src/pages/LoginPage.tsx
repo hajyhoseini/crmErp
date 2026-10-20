@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Alert } from 'antd';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../auth/useAuth';
 import { fa } from '../i18n/fa';
 import { ApiError } from '../api/client';
@@ -16,14 +16,13 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { login, status } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // If already logged in, redirect directly
   const fromLocation = (location.state as { from?: { pathname?: string } })?.from?.pathname || '/';
 
-  if (status === 'authenticated') {
+  if (user) {
     return <Navigate to={fromLocation} replace />;
   }
 
@@ -36,13 +35,7 @@ export const LoginPage: React.FC = () => {
       navigate(fromLocation, { replace: true });
     } catch (err: unknown) {
       if (err instanceof ApiError) {
-        if (err.status === 400 || err.status === 401) {
-          setErrorMessage(fa.auth.invalidCredentials);
-        } else if (err.status === 0) {
-          setErrorMessage(fa.errors.networkError);
-        } else {
-          setErrorMessage(err.message || fa.errors.default);
-        }
+        setErrorMessage(err.message);
       } else if (err instanceof Error) {
         setErrorMessage(err.message || fa.errors.default);
       } else {
@@ -61,27 +54,26 @@ export const LoginPage: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#f1f5f9',
-        padding: 16,
-        direction: 'rtl',
+        paddingBlock: 16,
+        paddingInline: 16,
       }}
     >
       <Card
         style={{
           width: '100%',
-          maxWidth: 420,
+          maxWidth: 400,
           boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
-          borderRadius: 16,
+          borderRadius: 12,
           border: '1px solid #e2e8f0',
         }}
-        styles={{ body: { padding: '36px 28px' } }}
+        styles={{ body: { paddingBlock: 32, paddingInline: 28 } }}
       >
-        {/* Brand and Logo Header */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ textAlign: 'center', marginBlockEnd: 24 }}>
           <div
             style={{
-              width: 52,
-              height: 52,
-              borderRadius: 12,
+              width: 48,
+              height: 48,
+              borderRadius: 10,
               backgroundColor: '#2563eb',
               color: '#ffffff',
               display: 'inline-flex',
@@ -89,11 +81,11 @@ export const LoginPage: React.FC = () => {
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: 20,
-              marginBottom: 12,
+              marginBlockEnd: 12,
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
             }}
           >
-            {fa.app.shortName}
+            S
           </div>
           <h1
             style={{
@@ -117,9 +109,8 @@ export const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Error notification alert */}
         {errorMessage && (
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBlockEnd: 16 }}>
             <Alert
               message={errorMessage}
               type="error"
@@ -141,19 +132,19 @@ export const LoginPage: React.FC = () => {
             name="account"
             label={
               <span style={{ fontWeight: 500, fontSize: 13, color: '#334155' }}>
-                {fa.auth.emailOrAccount}
+                {fa.auth.account}
               </span>
             }
-            rules={[
-              { required: true, message: fa.validation.required },
-            ]}
+            rules={[{ required: true, message: fa.validation.required }]}
           >
             <Input
-              prefix={<MailOutlined style={{ color: '#94a3b8' }} />}
-              placeholder={fa.auth.emailOrAccountPlaceholder}
+              prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
+              placeholder={fa.auth.accountPlaceholder}
               size="large"
               className="ltr-input"
+              dir="ltr"
               autoFocus
+              disabled={loading}
             />
           </Form.Item>
 
@@ -164,29 +155,30 @@ export const LoginPage: React.FC = () => {
                 {fa.auth.password}
               </span>
             }
-            rules={[
-              { required: true, message: fa.validation.required },
-            ]}
+            rules={[{ required: true, message: fa.validation.required }]}
           >
             <Input.Password
               prefix={<LockOutlined style={{ color: '#94a3b8' }} />}
               placeholder={fa.auth.passwordPlaceholder}
               size="large"
               className="ltr-input"
+              dir="ltr"
+              disabled={loading}
             />
           </Form.Item>
 
-          <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
+          <Form.Item style={{ marginBlockStart: 24, marginBlockEnd: 0 }}>
             <Button
               type="primary"
               htmlType="submit"
               size="large"
               block
               loading={loading}
+              disabled={loading}
               style={{
-                height: 44,
+                height: 42,
                 fontWeight: 600,
-                fontSize: 15,
+                fontSize: 14,
               }}
             >
               {loading ? fa.auth.loggingIn : fa.auth.loginSubmit}

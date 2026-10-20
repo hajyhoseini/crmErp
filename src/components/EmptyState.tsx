@@ -31,15 +31,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <Empty
         image={Empty.PRESENTED_IMAGE_SIMPLE}
         description={
-          <div style={{ marginTop: 8 }}>
+          <div style={{ marginBlockStart: 8 }}>
             <div style={{ fontSize: 15, fontWeight: 500, color: '#334155' }}>{message}</div>
             {description && (
-              <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 4 }}>{description}</div>
+              <div style={{ fontSize: 13, color: '#94a3b8', marginBlockStart: 4 }}>{description}</div>
             )}
           </div>
         }
       >
-        {action && <div style={{ marginTop: 16 }}>{action}</div>}
+        {action && <div style={{ marginBlockStart: 16 }}>{action}</div>}
         {children}
       </Empty>
     </div>

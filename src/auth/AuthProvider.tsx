@@ -1,14 +1,16 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { checkAuth, signIn } from '../api/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import { checkAuth, checkRoles, signIn } from '../api/auth';
 import { ApiError, registerUnauthorizedHandler, unregisterUnauthorizedHandler } from '../api/client';
 import type { AuthUser } from '../api/types';
 import { clearToken, getToken, setToken } from './token';
 
-export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
-
 export interface AuthContextValue {
   user: AuthUser | null;
-  status: AuthStatus;
+  snippets: string[];
+  allowAll: boolean;
+  isRoot: boolean;
+  loading: boolean;
   login: (account: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -21,95 +23,110 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [status, setStatus] = useState<AuthStatus>('loading');
+  const [snippets, setSnippets] = useState<string[]>([]);
+  const [allowAll, setAllowAll] = useState<boolean>(false);
+  const [isRoot, setIsRoot] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const queryClient = useQueryClient();
+
+  const handleUnauthenticated = useCallback(() => {
+    clearToken();
+    queryClient.clear();
+    setUser(null);
+    setSnippets([]);
+    setAllowAll(false);
+    setIsRoot(false);
+    setLoading(false);
+  }, [queryClient]);
 
   const logout = useCallback(() => {
-    clearToken();
-    setUser(null);
-    setStatus('unauthenticated');
-  }, []);
-
-  const login = useCallback(async (account: string, password: string): Promise<void> => {
-    const res = await signIn(account, password);
-    if (res?.data?.token) {
-      setToken(res.data.token);
-      setUser(res.data.user || { id: 'current', account, email: account });
-      setStatus('authenticated');
-    } else {
-      throw new Error('Invalid token response from server');
+    handleUnauthenticated();
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
     }
+  }, [handleUnauthenticated]);
+
+  const loadSessionData = useCallback(async (signal?: AbortSignal) => {
+    const userData = await checkAuth(signal);
+    const rolesData = await checkRoles(signal);
+
+    const userHasRoot = Array.isArray(userData.roles) && userData.roles.some((r) => r.name === 'root');
+    const rolesHasRoot = Array.isArray(rolesData.roles) && rolesData.roles.includes('root');
+    const rootDetected = Boolean(userHasRoot || rolesHasRoot);
+
+    setUser(userData);
+    setSnippets(Array.isArray(rolesData.snippets) ? rolesData.snippets : []);
+    setAllowAll(Boolean(rolesData.allowAll));
+    setIsRoot(rootDetected);
   }, []);
 
-  // Listen for 401 signals from the API client
+  const login = useCallback(
+    async (account: string, password: string): Promise<void> => {
+      const res = await signIn(account, password);
+      if (res?.data?.token) {
+        setToken(res.data.token);
+        await loadSessionData();
+      } else {
+        throw new Error('Invalid token response from server');
+      }
+    },
+    [loadSessionData]
+  );
+
   useEffect(() => {
     registerUnauthorizedHandler(() => {
-      setUser(null);
-      setStatus('unauthenticated');
+      handleUnauthenticated();
     });
     return () => {
       unregisterUnauthorizedHandler();
     };
-  }, []);
+  }, [handleUnauthenticated]);
 
-  // On startup: check token and validate if present
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      setStatus('unauthenticated');
+      setLoading(false);
       return;
     }
 
     let isMounted = true;
     const controller = new AbortController();
 
-    async function verifyToken() {
+    async function bootstrap() {
       try {
-        const currentUser = await checkAuth(controller.signal);
+        await loadSessionData(controller.signal);
         if (isMounted) {
-          setUser(currentUser);
-          setStatus('authenticated');
+          setLoading(false);
         }
       } catch (err: unknown) {
         if (!isMounted) return;
-
-        // If the server explicitly rejected the token with 401 Unauthorized:
         if (err instanceof ApiError && err.status === 401) {
-          clearToken();
-          setUser(null);
-          setStatus('unauthenticated');
+          handleUnauthenticated();
           return;
         }
-
-        // UNVERIFIED ENDPOINT FALLBACK:
-        // Since `GET /api/auth:check` is an unverified NocoBase endpoint,
-        // if it fails for any reason OTHER than 401 (e.g. 404 endpoint not found,
-        // or temporary network/dev server offline), we still treat the user as
-        // authenticated using the stored token so that valid sessions are preserved.
-        setUser({
-          id: 'current',
-          email: 'user@example.com',
-          name: 'کاربر سیستم',
-        });
-        setStatus('authenticated');
+        handleUnauthenticated();
       }
     }
 
-    verifyToken();
+    bootstrap();
 
     return () => {
       isMounted = false;
       controller.abort();
     };
-  }, []);
+  }, [handleUnauthenticated, loadSessionData]);
 
   const contextValue = useMemo<AuthContextValue>(
     () => ({
       user,
-      status,
+      snippets,
+      allowAll,
+      isRoot,
+      loading,
       login,
       logout,
     }),
-    [user, status, login, logout]
+    [user, snippets, allowAll, isRoot, loading, login, logout]
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

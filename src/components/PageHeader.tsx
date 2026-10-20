@@ -15,8 +15,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 16,
-        marginBottom: 24,
-        paddingBottom: 16,
+        marginBlockEnd: 24,
+        paddingBlockEnd: 16,
         borderBottom: '1px solid #e2e8f0',
       }}
     >
@@ -35,7 +35,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions
         {subtitle && (
           <p
             style={{
-              margin: '4px 0 0 0',
+              marginBlockStart: 4,
+              marginBlockEnd: 0,
               fontSize: 13,
               color: '#64748b',
               lineHeight: 1.5,

@@ -1,29 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Layout, Menu, Button, Drawer, Grid, type MenuProps } from 'antd';
 import {
-  Layout,
-  Menu,
-  Button,
-  Dropdown,
-  Avatar,
-  Drawer,
-  Grid,
-  type MenuProps,
-} from 'antd';
-import {
-  DashboardOutlined,
-  BankOutlined,
-  TeamOutlined,
-  DollarOutlined,
-  CheckSquareOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MenuOutlined,
-  UserOutlined,
   LogoutOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../auth/useAuth';
+import { useCan } from '../auth/useCan';
 import { fa } from '../i18n/fa';
+import { navItems } from './navConfig';
+import { ADMIN_PANEL_URL } from '../config';
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -32,90 +21,39 @@ export const AppLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const screens = useBreakpoint();
-  const isMobile = screens.md === false; // < 768px
+  const isMobile = screens.md === false;
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isRoot } = useAuth();
+  const can = useCan;
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setMobileDrawerOpen(false);
   }, [location.pathname]);
 
-  // Determine current active navigation key
-  const selectedKey = React.useMemo(() => {
-    const path = location.pathname;
-    if (path === '/' || path.startsWith('/dashboard')) return 'dashboard';
-    if (path.startsWith('/companies')) return 'companies';
-    if (path.startsWith('/contacts')) return 'contacts';
-    if (path.startsWith('/deals')) return 'deals';
-    if (path.startsWith('/activities')) return 'activities';
-    return 'dashboard';
-  }, [location.pathname]);
+  const accessibleNavItems = useMemo(() => {
+    return navItems.filter((item) => !item.snippet || can(item.snippet));
+  }, [can]);
 
-  const menuItems: MenuProps['items'] = [
-    {
-      key: 'dashboard',
-      icon: <DashboardOutlined />,
-      label: fa.nav.dashboard,
-      onClick: () => navigate('/'),
-    },
-    {
-      key: 'companies',
-      icon: <BankOutlined />,
-      label: fa.nav.companies,
-      onClick: () => navigate('/companies'),
-    },
-    {
-      key: 'contacts',
-      icon: <TeamOutlined />,
-      label: fa.nav.contacts,
-      onClick: () => navigate('/contacts'),
-    },
-    {
-      key: 'deals',
-      icon: <DollarOutlined />,
-      label: fa.nav.deals,
-      onClick: () => navigate('/deals'),
-    },
-    {
-      key: 'activities',
-      icon: <CheckSquareOutlined />,
-      label: fa.nav.activities,
-      onClick: () => navigate('/activities'),
-    },
-  ];
+  const menuItems: MenuProps['items'] = useMemo(() => {
+    return accessibleNavItems.map((item) => ({
+      key: item.path,
+      icon: item.icon,
+      label: item.label,
+      onClick: () => navigate(item.path),
+    }));
+  }, [accessibleNavItems, navigate]);
 
-  const userMenuItems: MenuProps['items'] = [
-    {
-      key: 'user-info',
-      disabled: true,
-      label: (
-        <div style={{ padding: '4px 0' }}>
-          <div style={{ fontWeight: 600, color: '#0f172a' }}>
-            {user?.name || user?.nickname || fa.auth.userProfile}
-          </div>
-          <div style={{ fontSize: 12, color: '#64748b' }} className="ltr-text">
-            {user?.email || user?.account || ''}
-          </div>
-        </div>
-      ),
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      danger: true,
-      icon: <LogoutOutlined />,
-      label: fa.auth.logout,
-      onClick: () => {
-        logout();
-        navigate('/login', { replace: true });
-      },
-    },
-  ];
+  const selectedKey = useMemo(() => {
+    const current = accessibleNavItems.find((item) => {
+      if (item.path === '/') {
+        return location.pathname === '/';
+      }
+      return location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+    });
+    return current ? current.path : location.pathname;
+  }, [accessibleNavItems, location.pathname]);
 
   const brandHeader = (
     <div
@@ -123,7 +61,7 @@ export const AppLayout: React.FC = () => {
         height: 64,
         display: 'flex',
         alignItems: 'center',
-        padding: '0 16px',
+        paddingInline: 16,
         borderBottom: '1px solid #f1f5f9',
         gap: 10,
       }}
@@ -143,13 +81,13 @@ export const AppLayout: React.FC = () => {
           flexShrink: 0,
         }}
       >
-        {fa.app.shortName}
+        S
       </div>
       {(!collapsed || isMobile) && (
         <span
           style={{
             fontWeight: 700,
-            fontSize: 14,
+            fontSize: 16,
             color: '#0f172a',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -163,8 +101,7 @@ export const AppLayout: React.FC = () => {
   );
 
   return (
-    <Layout style={{ minHeight: '100vh', direction: 'rtl' }}>
-      {/* Desktop RTL Sidebar (Right side in RTL mode) */}
+    <Layout style={{ minHeight: '100vh' }}>
       {!isMobile && (
         <Sider
           collapsible
@@ -177,14 +114,14 @@ export const AppLayout: React.FC = () => {
           style={{
             borderInlineStart: '1px solid #e2e8f0',
             position: 'sticky',
-            top: 0,
+            insetBlockStart: 0,
             height: '100vh',
             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
             zIndex: 10,
           }}
         >
           {brandHeader}
-          <div style={{ padding: '12px 8px' }}>
+          <div style={{ paddingBlock: 12, paddingInline: 8 }}>
             <Menu
               mode="inline"
               selectedKeys={[selectedKey]}
@@ -195,14 +132,13 @@ export const AppLayout: React.FC = () => {
         </Sider>
       )}
 
-      {/* Mobile Sidebar Drawer */}
       {isMobile && (
         <Drawer
           title={brandHeader}
           placement="right"
           onClose={() => setMobileDrawerOpen(false)}
           open={mobileDrawerOpen}
-          styles={{ body: { padding: '12px 8px' }, header: { padding: 0 } }}
+          styles={{ body: { paddingBlock: 12, paddingInline: 8 }, header: { padding: 0 } }}
           width={260}
         >
           <Menu
@@ -215,10 +151,10 @@ export const AppLayout: React.FC = () => {
       )}
 
       <Layout>
-        {/* App Header */}
         <Header
           style={{
-            padding: '0 20px',
+            paddingInline: 20,
+            paddingBlock: 0,
             background: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -226,7 +162,7 @@ export const AppLayout: React.FC = () => {
             borderBottom: '1px solid #e2e8f0',
             height: 64,
             position: 'sticky',
-            top: 0,
+            insetBlockStart: 0,
             zIndex: 9,
           }}
         >
@@ -236,7 +172,7 @@ export const AppLayout: React.FC = () => {
                 type="text"
                 icon={<MenuOutlined />}
                 onClick={() => setMobileDrawerOpen(true)}
-                aria-label="منوی ناوبری"
+                aria-label={fa.nav.home}
                 style={{ fontSize: 16, width: 40, height: 40 }}
               />
             ) : (
@@ -244,54 +180,52 @@ export const AppLayout: React.FC = () => {
                 type="text"
                 icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                 onClick={() => setCollapsed(!collapsed)}
-                aria-label="تغییر وضعیت منو"
+                aria-label={fa.app.name}
                 style={{ fontSize: 16, width: 40, height: 40 }}
               />
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomLeft" trigger={['click']}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {isRoot && (
               <Button
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '4px 10px',
-                  borderRadius: 8,
-                  height: 38,
-                  background: '#f8fafc',
-                  borderColor: '#e2e8f0',
-                }}
-                aria-label={fa.auth.userProfile}
+                type="default"
+                icon={<SafetyCertificateOutlined />}
+                href={ADMIN_PANEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Avatar
-                  style={{ backgroundColor: '#2563eb' }}
-                  icon={<UserOutlined />}
-                  size="small"
-                />
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: '#334155',
-                    maxWidth: 140,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {user?.name || user?.nickname || user?.email || fa.auth.userProfile}
-                </span>
+                {fa.nav.adminPanel}
               </Button>
-            </Dropdown>
+            )}
+
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#334155',
+                paddingInline: 8,
+              }}
+            >
+              {user?.nickname || user?.username || user?.email || fa.auth.userProfile}
+            </div>
+
+            <Button
+              type="text"
+              danger
+              icon={<LogoutOutlined />}
+              onClick={logout}
+              aria-label={fa.auth.logout}
+            >
+              {fa.auth.logout}
+            </Button>
           </div>
         </Header>
 
-        {/* Content Area with Max Width and Padding */}
         <Content
           style={{
-            padding: isMobile ? 16 : 24,
+            paddingBlock: isMobile ? 16 : 24,
+            paddingInline: isMobile ? 16 : 24,
             minHeight: 280,
             backgroundColor: '#f8fafc',
           }}
@@ -299,7 +233,7 @@ export const AppLayout: React.FC = () => {
           <div
             style={{
               maxWidth: 1200,
-              margin: '0 auto',
+              marginInline: 'auto',
               width: '100%',
             }}
           >

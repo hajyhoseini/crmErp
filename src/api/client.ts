@@ -1,11 +1,7 @@
 import { getToken, clearToken } from '../auth/token';
 import { fa } from '../i18n/fa';
-import type { ListParams } from './types';
+import type { ApiErrorBody } from './types';
 
-/**
- * Normalized API error class containing HTTP status, user-friendly Persian message,
- * and the raw response body if available.
- */
 export class ApiError extends Error {
   public status: number;
   public raw: unknown;
@@ -19,34 +15,22 @@ export class ApiError extends Error {
 }
 
 export interface RequestOptions extends RequestInit {
-  params?: ListParams | Record<string, unknown>;
+  params?: Record<string, unknown>;
   skipAuth?: boolean;
 }
 
 type UnauthorizedHandler = () => void;
 let unauthorizedHandler: UnauthorizedHandler | null = null;
 
-/**
- * Register a callback triggered when an HTTP 401 Unauthorized occurs.
- */
 export function registerUnauthorizedHandler(handler: UnauthorizedHandler): void {
   unauthorizedHandler = handler;
 }
 
-/**
- * Unregister the unauthorized callback.
- */
 export function unregisterUnauthorizedHandler(): void {
   unauthorizedHandler = null;
 }
 
-/**
- * Builds a query string adhering to NocoBase API conventions:
- * - Arrays with brackets, e.g. appends[]=relation1&appends[]=relation2
- * - Complex filter objects encoded as JSON strings: filter=%7B%22stage%22%3A%22lead%22%7D
- * - Simple primitives serialized directly
- */
-export function buildQueryString(params?: ListParams | Record<string, unknown>): string {
+export function buildQueryString(params?: Record<string, unknown>): string {
   if (!params) return '';
 
   const searchParams = new URLSearchParams();
@@ -56,13 +40,7 @@ export function buildQueryString(params?: ListParams | Record<string, unknown>):
       continue;
     }
 
-    if (key === 'filter' && typeof value === 'object') {
-      searchParams.append('filter', JSON.stringify(value));
-    } else if (key === 'appends' && Array.isArray(value)) {
-      value.forEach((item) => {
-        searchParams.append('appends[]', String(item));
-      });
-    } else if (Array.isArray(value)) {
+    if (Array.isArray(value)) {
       value.forEach((item) => {
         searchParams.append(`${key}[]`, String(item));
       });
@@ -77,10 +55,18 @@ export function buildQueryString(params?: ListParams | Record<string, unknown>):
   return qs ? `?${qs}` : '';
 }
 
-/**
- * Extracts a normalized Persian error message from an unknown error response.
- */
 function extractErrorMessage(status: number, body: unknown): string {
+  if (body && typeof body === 'object') {
+    const errorBody = body as ApiErrorBody;
+    const firstErrorMessage = errorBody.errors?.[0]?.message;
+    if (typeof firstErrorMessage === 'string' && firstErrorMessage.trim()) {
+      return firstErrorMessage;
+    }
+    if (typeof errorBody.message === 'string' && errorBody.message.trim()) {
+      return errorBody.message;
+    }
+  }
+
   if (status === 401) {
     return fa.auth.sessionExpired;
   }
@@ -94,36 +80,9 @@ function extractErrorMessage(status: number, body: unknown): string {
     return fa.errors.serverError;
   }
 
-  if (body && typeof body === 'object') {
-    const errorObj = body as {
-      errors?: Array<{ message?: string }>;
-      message?: string;
-      error?: string;
-    };
-
-    if (Array.isArray(errorObj.errors) && errorObj.errors.length > 0) {
-      const firstMsg = errorObj.errors[0]?.message;
-      if (firstMsg && typeof firstMsg === 'string' && firstMsg.trim()) {
-        return firstMsg;
-      }
-    }
-
-    if (typeof errorObj.message === 'string' && errorObj.message.trim()) {
-      return errorObj.message;
-    }
-
-    if (typeof errorObj.error === 'string' && errorObj.error.trim()) {
-      return errorObj.error;
-    }
-  }
-
   return fa.errors.default;
 }
 
-/**
- * Core HTTP request client wrapping native fetch with authorization,
- * query string serialization, and error normalization.
- */
 export async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { params, skipAuth = false, headers: customHeaders, ...fetchOptions } = options;
 
@@ -134,7 +93,6 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     Accept: 'application/json',
   };
 
-  // Only set Content-Type if body exists and is not FormData
   if (fetchOptions.body && typeof fetchOptions.body === 'string') {
     headers['Content-Type'] = 'application/json';
   }
@@ -161,11 +119,9 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     if (err instanceof DOMException && err.name === 'AbortError') {
       throw err;
     }
-    // Network failure / server offline
     throw new ApiError(0, fa.errors.networkError, err);
   }
 
-  // Handle 401 Unauthorized
   if (response.status === 401) {
     clearToken();
     if (unauthorizedHandler) {
@@ -173,7 +129,6 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     }
   }
 
-  // Parse response body
   let body: unknown = null;
   const contentType = response.headers.get('content-type') || '';
   if (contentType.includes('application/json')) {
