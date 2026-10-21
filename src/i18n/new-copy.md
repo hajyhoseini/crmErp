@@ -83,3 +83,34 @@
 | `devProbe.notRunYet` | اجرا نشده | Not run yet |
 | `devProbe.modalTitle` | پاسخ دریافتی نقطه پایانی | Endpoint Response |
 | `devProbe.close` | بستن | Close |
+| `dashboard.greeting` | سلام، {name} | Hello, {name} |
+| `dashboard.greetingDefault` | سلام | Hello |
+| `dashboard.currentDate` | امروز: {date} | Today: {date} |
+| `dashboard.totalProcesses` | مجموع فرایندها | Total processes |
+| `dashboard.totalPositions` | مجموع سمت‌های سازمانی | Total organizational positions |
+| `dashboard.totalDocuments` | مستندات دانش | Knowledge documents |
+| `dashboard.readyDocuments` | مستندات آماده | Ready documents |
+| `dashboard.readyRate` | نرخ آمادگی مستندات | Documents readiness rate |
+| `dashboard.processesTitle` | فرایندهای سازمانی | Organizational processes |
+| `dashboard.searchProcesses` | جستجوی فرایند... | Search process... |
+| `dashboard.versionTag` | نسخه {version} | Version {version} |
+| `dashboard.showAll` | نمایش همه ({count}) | Show all ({count}) |
+| `dashboard.showLess` | نمایش کمتر | Show less |
+| `dashboard.positionsTitle` | سمت‌های سازمانی به تفکیک واحد | Organizational positions by department |
+| `dashboard.unassignedDepartment` | بدون واحد سازمانی | Unassigned department |
+| `dashboard.positionsCount` | {count} سمت | {count} positions |
+| `dashboard.knowledgeTitle` | وضعیت دانش سازمانی | Organizational knowledge status |
+| `dashboard.knowledgeDisabledNotice` | سرویس دانش غیرفعال است | Knowledge service is disabled |
+| `dashboard.maxMegabytes` | حداکثر حجم: {size} مگابایت | Maximum size: {size} MB |
+| `dashboard.categoryDocumentsRatio` | {ready} از {total} مستند آماده | {ready} of {total} documents ready |
+| `dashboard.syncTitle` | همگام‌سازی داده‌های خارجی | External data synchronization |
+| `dashboard.syncsCountLabel` | همگام‌سازی‌ها | Synchronizations |
+| `dashboard.runsCountLabel` | اجراها | Runs |
+| `dashboard.emptySyncs` | هنوز همگام‌سازی تعریف نشده است | No synchronization has been defined yet |
+| `dashboard.speechTitle` | وضعیت سرویس گفتار به متن | Speech-to-text service status |
+| `dashboard.speechActive` | سرویس گفتار فعال است | Speech service is active |
+| `dashboard.speechInactive` | سرویس گفتار غیرفعال است | Speech service is inactive |
+| `dashboard.speechUnavailable` | در دسترس نیست | Unavailable |
+| `dashboard.noPositions` | سمتی برای این بخش ثبت نشده است | No positions registered for this section |
+| `dashboard.noProcesses` | فرایندی ثبت نشده است | No processes registered |
+| `dashboard.noCategories` | دسته‌بندی دانشی ثبت نشده است | No knowledge categories registered |

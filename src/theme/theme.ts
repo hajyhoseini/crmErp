@@ -1,24 +1,32 @@
 import type { ThemeConfig } from 'antd';
 
+export const THEME_COLORS = {
+  primary: '#2563eb',
+  accent1: '#14b8a6',
+  accent2: '#f59e0b',
+  bgLayout: '#f5f7fb',
+  bgCard: '#ffffff',
+} as const;
+
 export const VAZIRMATN_FONT = "'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 export const appTheme: ThemeConfig = {
   token: {
     fontFamily: VAZIRMATN_FONT,
-    colorPrimary: '#2563eb',
-    colorInfo: '#2563eb',
+    colorPrimary: THEME_COLORS.primary,
+    colorInfo: THEME_COLORS.primary,
     colorSuccess: '#16a34a',
-    colorWarning: '#d97706',
+    colorWarning: THEME_COLORS.accent2,
     colorError: '#dc2626',
     colorTextBase: '#0f172a',
     colorTextSecondary: '#475569',
-    colorBgBase: '#ffffff',
-    colorBgLayout: '#f8fafc',
+    colorBgBase: THEME_COLORS.bgCard,
+    colorBgLayout: THEME_COLORS.bgLayout,
     colorBorder: '#e2e8f0',
     colorBorderSecondary: '#f1f5f9',
-    borderRadius: 8,
-    borderRadiusSM: 6,
-    borderRadiusLG: 10,
+    borderRadius: 12,
+    borderRadiusSM: 8,
+    borderRadiusLG: 12,
     fontSize: 14,
     wireframe: false,
   },
@@ -38,7 +46,7 @@ export const appTheme: ThemeConfig = {
       controlHeight: 38,
     },
     Card: {
-      borderRadiusLG: 10,
+      borderRadiusLG: 12,
       colorBorderSecondary: '#e2e8f0',
     },
     Table: {
@@ -54,10 +62,10 @@ export const appTheme: ThemeConfig = {
     Layout: {
       headerBg: '#ffffff',
       siderBg: '#ffffff',
-      bodyBg: '#f8fafc',
+      bodyBg: THEME_COLORS.bgLayout,
     },
     Modal: {
-      borderRadiusLG: 10,
+      borderRadiusLG: 12,
     },
   },
 };
