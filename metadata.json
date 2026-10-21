@@ -1,6 +1,0 @@
-{
-  "name": "سیستم مدیریت ارتباط با مشتری (CRM)",
-  "description": "سامانه مدیریت ارتباط با مشتریان (CRM) مدرن، مینیمال و راست‌چین برای تیم‌های فروش",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

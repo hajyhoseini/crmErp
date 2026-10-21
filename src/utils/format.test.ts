@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatNumber, formatDate } from './format.ts';
+import { formatNumber, formatDate } from './format';
 
 test('formatNumber handles numbers, zeros, null, and empty string', () => {
   assert.equal(formatNumber(0), '۰');

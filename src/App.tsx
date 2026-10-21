@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { ConfigProvider, App as AntdApp } from 'antd';
 import fa_IR from 'antd/locale/fa_IR';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { appTheme } from './theme/theme';
 import { AuthProvider } from './auth/AuthProvider';
-import { router } from './router';
+import { AppRoutes } from './router';
 import { ApiError } from './api/client';
 
 export function App() {
@@ -33,7 +33,9 @@ export function App() {
       <AntdApp>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <RouterProvider router={router} />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
           </AuthProvider>
         </QueryClientProvider>
       </AntdApp>

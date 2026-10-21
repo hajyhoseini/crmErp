@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hasSnippet } from './permissions.ts';
+import { hasSnippet } from './permissions';
 
 test('hasSnippet grants everything when allowAll is true', () => {
   assert.equal(hasSnippet([], 'pm.anything', true), true);
