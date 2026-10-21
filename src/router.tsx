@@ -4,6 +4,8 @@ import { Can } from './auth/Can';
 import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/LoginPage';
 import { HomePage } from './pages/HomePage';
+import { KnowledgePage } from './pages/KnowledgePage';
+import { SpeechPage } from './pages/SpeechPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ForbiddenState } from './components/ForbiddenState';
@@ -38,7 +40,7 @@ export const router = createBrowserRouter([
         path: 'knowledge',
         element: (
           <Can snippet="pm.knowledge.manage" fallback={<ForbiddenState />}>
-            <PlaceholderPage title={fa.nav.knowledge} />
+            <KnowledgePage />
           </Can>
         ),
       },
@@ -70,7 +72,7 @@ export const router = createBrowserRouter([
         path: 'speech',
         element: (
           <Can snippet="pm.speech.settings" fallback={<ForbiddenState />}>
-            <PlaceholderPage title={fa.nav.speech} />
+            <SpeechPage />
           </Can>
         ),
       },

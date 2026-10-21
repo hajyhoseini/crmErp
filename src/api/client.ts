@@ -1,15 +1,18 @@
-import { getToken, clearToken } from '../auth/token';
+import { getToken, setToken, clearToken } from '../auth/token';
+import { getActiveRole, clearActiveRole } from '../auth/role';
 import { fa } from '../i18n/fa';
 import type { ApiErrorBody } from './types';
 
 export class ApiError extends Error {
   public status: number;
+  public code?: string;
   public raw: unknown;
 
-  constructor(status: number, message: string, raw?: unknown) {
+  constructor(status: number, message: string, code?: string, raw?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.code = code;
     this.raw = raw;
   }
 }
@@ -17,10 +20,12 @@ export class ApiError extends Error {
 export interface RequestOptions extends RequestInit {
   params?: Record<string, unknown>;
   skipAuth?: boolean;
+  _isRetry?: boolean;
 }
 
 type UnauthorizedHandler = () => void;
 let unauthorizedHandler: UnauthorizedHandler | null = null;
+let renewalPromise: Promise<void> | null = null;
 
 export function registerUnauthorizedHandler(handler: UnauthorizedHandler): void {
   unauthorizedHandler = handler;
@@ -56,22 +61,23 @@ export function buildQueryString(params?: Record<string, unknown>): string {
 }
 
 function extractErrorMessage(status: number, body: unknown): string {
+  if (status === 403) {
+    return fa.errors.forbidden;
+  }
+
   if (body && typeof body === 'object') {
     const errorBody = body as ApiErrorBody;
     const firstErrorMessage = errorBody.errors?.[0]?.message;
-    if (typeof firstErrorMessage === 'string' && firstErrorMessage.trim()) {
+    if (typeof firstErrorMessage === 'string' && firstErrorMessage.trim() && firstErrorMessage !== 'No permissions') {
       return firstErrorMessage;
     }
-    if (typeof errorBody.message === 'string' && errorBody.message.trim()) {
+    if (typeof errorBody.message === 'string' && errorBody.message.trim() && errorBody.message !== 'No permissions') {
       return errorBody.message;
     }
   }
 
   if (status === 401) {
     return fa.auth.sessionExpired;
-  }
-  if (status === 403) {
-    return fa.errors.forbidden;
   }
   if (status === 404) {
     return fa.errors.notFound;
@@ -83,14 +89,52 @@ function extractErrorMessage(status: number, body: unknown): string {
   return fa.errors.default;
 }
 
+function extractErrorCode(body: unknown): string | undefined {
+  if (body && typeof body === 'object') {
+    const errorBody = body as ApiErrorBody;
+    const code = errorBody.errors?.[0]?.code;
+    if (typeof code === 'string') {
+      return code;
+    }
+  }
+  return undefined;
+}
+
+async function runSingleTokenRenewal(): Promise<void> {
+  if (!renewalPromise) {
+    renewalPromise = (async () => {
+      try {
+        const token = getToken();
+        if (!token) return;
+        const res = await fetch('/api/auth:check', {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'X-Locale': 'fa-IR',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const newToken = res.headers.get('x-new-token');
+        if (newToken && newToken !== token) {
+          setToken(newToken);
+        }
+      } finally {
+        renewalPromise = null;
+      }
+    })();
+  }
+  return renewalPromise;
+}
+
 export async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { params, skipAuth = false, headers: customHeaders, ...fetchOptions } = options;
+  const { params, skipAuth = false, headers: customHeaders, _isRetry = false, ...fetchOptions } = options;
 
   const queryString = buildQueryString(params);
   const url = `${endpoint}${queryString}`;
 
   const headers: Record<string, string> = {
     Accept: 'application/json',
+    'X-Locale': 'fa-IR',
   };
 
   if (fetchOptions.body && typeof fetchOptions.body === 'string') {
@@ -101,6 +145,10 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     const token = getToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+    }
+    const role = getActiveRole();
+    if (role) {
+      headers['X-Role'] = role;
     }
   }
 
@@ -119,13 +167,14 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     if (err instanceof DOMException && err.name === 'AbortError') {
       throw err;
     }
-    throw new ApiError(0, fa.errors.networkError, err);
+    throw new ApiError(0, fa.errors.networkError, undefined, err);
   }
 
-  if (response.status === 401) {
-    clearToken();
-    if (unauthorizedHandler) {
-      unauthorizedHandler();
+  const newToken = response.headers.get('x-new-token');
+  if (newToken) {
+    const currentToken = getToken();
+    if (newToken !== currentToken) {
+      setToken(newToken);
     }
   }
 
@@ -145,9 +194,39 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     }
   }
 
-  if (!response.ok) {
+  if (response.status === 401) {
+    const errorCode = extractErrorCode(body);
+    const isStream = finalHeaders.Accept === 'text/event-stream' || finalHeaders.accept === 'text/event-stream';
+
+    if (isStream && errorCode === 'SKIP_TOKEN_RENEW' && !_isRetry) {
+      await runSingleTokenRenewal();
+      return request<T>(endpoint, {
+        ...options,
+        _isRetry: true,
+      });
+    }
+
+    if (
+      errorCode === 'EMPTY_TOKEN' ||
+      errorCode === 'INVALID_TOKEN' ||
+      errorCode === 'EXPIRED_SESSION' ||
+      !errorCode
+    ) {
+      clearToken();
+      clearActiveRole();
+      if (unauthorizedHandler) {
+        unauthorizedHandler();
+      }
+    }
+
     const message = extractErrorMessage(response.status, body);
-    throw new ApiError(response.status, message, body);
+    throw new ApiError(response.status, message, errorCode, body);
+  }
+
+  if (!response.ok) {
+    const errorCode = extractErrorCode(body);
+    const message = extractErrorMessage(response.status, body);
+    throw new ApiError(response.status, message, errorCode, body);
   }
 
   return body as T;

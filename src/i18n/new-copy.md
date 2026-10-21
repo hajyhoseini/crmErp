@@ -32,6 +32,8 @@
 | `auth.userProfile` | حساب کاربری | User Account / Profile |
 | `auth.sessionExpired` | نشست کاربری شما به پایان رسیده است. لطفاً مجدداً وارد شوید. | Your session has expired. Please sign in again. |
 | `auth.invalidCredentials` | نام کاربری یا کلمه عبور وارد شده صحیح نمی‌باشد. | Invalid username or password entered. |
+| `roles.select` | انتخاب نقش | Select role |
+| `roles.title` | نقش کاربری | User role |
 | `nav.home` | صفحه اصلی | Home Page |
 | `nav.processes` | فرایندها | Processes |
 | `nav.knowledge` | دانش سازمانی | Organizational Knowledge |
@@ -45,6 +47,12 @@
 | `home.quickAccess` | دسترسی سریع به بخش‌های سامانه | Quick access to system modules |
 | `home.noModulesAvailable` | در حال حاضر بخشی برای دسترسی شما تعریف نشده است. | No accessible modules are currently assigned to you. |
 | `placeholder.inProgress` | این بخش در حال آماده‌سازی است. | This feature is being prepared. |
+| `knowledge.status` | وضعیت سرویس دانش سازمانی | Organizational Knowledge Service Status |
+| `knowledge.configured` | پیکربندی شده | Configured |
+| `knowledge.notConfigured` | پیکربندی نشده | Not configured |
+| `speech.status` | وضعیت سرویس گفتار به متن | Speech-to-Text Service Status |
+| `speech.configured` | فعال | Active / Configured |
+| `speech.notAvailableNotice` | سرویس گفتار به متن در حال حاضر در دسترس نمی‌باشد. | Speech-to-text service is currently not available. |
 | `errors.default` | خطایی در پردازش اطلاعات رخ داد. لطفاً مجدداً تلاش نمایید. | An error occurred while processing information. Please try again. |
 | `errors.networkError` | خطا در برقراری ارتباط با سرور. لطفاً اتصال شبکه خود را بررسی نمایید. | Failed to connect to server. Please check your network connection. |
 | `errors.notFound` | صفحه مورد نظر یافت نشد. | Requested page was not found. |

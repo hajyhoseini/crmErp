@@ -1,2 +1,2 @@
-// UNVERIFIED: The production URL is decided by the deployment team.
-export const ADMIN_PANEL_URL = 'http://localhost:13000/admin';
+// UNVERIFIED: The final production address is not decided yet.
+export const ADMIN_PANEL_URL = 'https://smartbase.ir/admin';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu, Button, Drawer, Grid, type MenuProps } from 'antd';
+import { Layout, Menu, Button, Drawer, Select, Grid, type MenuProps } from 'antd';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -25,7 +25,7 @@ export const AppLayout: React.FC = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, isRoot } = useAuth();
+  const { user, logout, isRoot, activeRole, switchRole } = useAuth();
   const can = useCan;
 
   useEffect(() => {
@@ -54,6 +54,8 @@ export const AppLayout: React.FC = () => {
     });
     return current ? current.path : location.pathname;
   }, [accessibleNavItems, location.pathname]);
+
+  const hasMultipleRoles = Boolean(user?.roles && user.roles.length > 1);
 
   const brandHeader = (
     <div
@@ -187,6 +189,20 @@ export const AppLayout: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {hasMultipleRoles && (
+              <Select
+                value={activeRole || undefined}
+                onChange={(val) => switchRole(val)}
+                options={user?.roles?.map((r) => ({
+                  value: r.name,
+                  label: r.title || r.name,
+                }))}
+                style={{ minWidth: 130 }}
+                placeholder={fa.roles.select}
+                aria-label={fa.roles.title}
+              />
+            )}
+
             {isRoot && (
               <Button
                 type="default"

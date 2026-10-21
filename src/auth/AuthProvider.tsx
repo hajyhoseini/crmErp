@@ -4,15 +4,18 @@ import { checkAuth, checkRoles, signIn } from '../api/auth';
 import { ApiError, registerUnauthorizedHandler, unregisterUnauthorizedHandler } from '../api/client';
 import type { AuthUser } from '../api/types';
 import { clearToken, getToken, setToken } from './token';
+import { getActiveRole, setActiveRole, clearActiveRole } from './role';
 
 export interface AuthContextValue {
   user: AuthUser | null;
   snippets: string[];
   allowAll: boolean;
+  activeRole: string | null;
   isRoot: boolean;
   loading: boolean;
   login: (account: string, password: string) => Promise<void>;
   logout: () => void;
+  switchRole: (newRole: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -25,17 +28,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [snippets, setSnippets] = useState<string[]>([]);
   const [allowAll, setAllowAll] = useState<boolean>(false);
-  const [isRoot, setIsRoot] = useState<boolean>(false);
+  const [activeRole, setActiveRoleState] = useState<string | null>(getActiveRole());
   const [loading, setLoading] = useState<boolean>(true);
   const queryClient = useQueryClient();
 
+  const isRoot = useMemo(() => {
+    const hasRootRole = Array.isArray(user?.roles) && user.roles.some((r) => r.name === 'root');
+    return Boolean(hasRootRole && activeRole === 'root');
+  }, [user, activeRole]);
+
   const handleUnauthenticated = useCallback(() => {
     clearToken();
+    clearActiveRole();
     queryClient.clear();
     setUser(null);
     setSnippets([]);
     setAllowAll(false);
-    setIsRoot(false);
+    setActiveRoleState(null);
     setLoading(false);
   }, [queryClient]);
 
@@ -50,15 +59,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const userData = await checkAuth(signal);
     const rolesData = await checkRoles(signal);
 
-    const userHasRoot = Array.isArray(userData.roles) && userData.roles.some((r) => r.name === 'root');
-    const rolesHasRoot = Array.isArray(rolesData.roles) && rolesData.roles.includes('root');
-    const rootDetected = Boolean(userHasRoot || rolesHasRoot);
+    const serverRole = rolesData.role || (Array.isArray(rolesData.roles) ? rolesData.roles[0] : null);
+    const existingStoredRole = getActiveRole();
+    const resolvedRole = existingStoredRole || serverRole || (userData.roles && userData.roles[0]?.name) || null;
+
+    if (resolvedRole) {
+      setActiveRole(resolvedRole);
+      setActiveRoleState(resolvedRole);
+    }
 
     setUser(userData);
     setSnippets(Array.isArray(rolesData.snippets) ? rolesData.snippets : []);
     setAllowAll(Boolean(rolesData.allowAll));
-    setIsRoot(rootDetected);
   }, []);
+
+  const switchRole = useCallback(
+    async (newRole: string) => {
+      setActiveRole(newRole);
+      setActiveRoleState(newRole);
+      const rolesData = await checkRoles();
+      setSnippets(Array.isArray(rolesData.snippets) ? rolesData.snippets : []);
+      setAllowAll(Boolean(rolesData.allowAll));
+    },
+    []
+  );
 
   const login = useCallback(
     async (account: string, password: string): Promise<void> => {
@@ -121,12 +145,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user,
       snippets,
       allowAll,
+      activeRole,
       isRoot,
       loading,
       login,
       logout,
+      switchRole,
     }),
-    [user, snippets, allowAll, isRoot, loading, login, logout]
+    [user, snippets, allowAll, activeRole, isRoot, loading, login, logout, switchRole]
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

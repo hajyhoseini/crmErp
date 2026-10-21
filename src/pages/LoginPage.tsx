@@ -138,6 +138,7 @@ export const LoginPage: React.FC = () => {
             rules={[{ required: true, message: fa.validation.required }]}
           >
             <Input
+              type="text"
               prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
               placeholder={fa.auth.accountPlaceholder}
               size="large"

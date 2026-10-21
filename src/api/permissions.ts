@@ -1,19 +1,9 @@
-function matchPattern(pattern: string, name: string): boolean {
-  if (pattern === name) {
-    return true;
-  }
-  if (pattern.endsWith('.*')) {
-    const prefix = pattern.slice(0, -2);
-    return name === prefix || name.startsWith(`${prefix}.`);
-  }
-  if (pattern.endsWith('*')) {
-    const prefix = pattern.slice(0, -1);
-    return name.startsWith(prefix);
-  }
-  return false;
+function globToRegExp(pattern: string): RegExp {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+  return new RegExp(`^${escaped}$`);
 }
 
-// UNVERIFIED: Evaluates allowAll, negation patterns with prefix or exact matches, and positive wildcard patterns.
+// UNVERIFIED: Evaluates allowAll, negation patterns with glob matching, and allowed patterns.
 export function hasSnippet(
   snippets: string[] | undefined | null,
   name: string,
@@ -28,8 +18,8 @@ export function hasSnippet(
 
   for (const entry of snippets) {
     if (entry.startsWith('!')) {
-      const negationPattern = entry.slice(1);
-      if (matchPattern(negationPattern, name)) {
+      const deniedPattern = entry.slice(1);
+      if (globToRegExp(deniedPattern).test(name)) {
         return false;
       }
     }
@@ -37,7 +27,7 @@ export function hasSnippet(
 
   for (const entry of snippets) {
     if (!entry.startsWith('!')) {
-      if (matchPattern(entry, name)) {
+      if (globToRegExp(entry).test(name)) {
         return true;
       }
     }

@@ -35,6 +35,10 @@ export const fa = {
     sessionExpired: 'نشست کاربری شما به پایان رسیده است. لطفاً مجدداً وارد شوید.',
     invalidCredentials: 'نام کاربری یا کلمه عبور وارد شده صحیح نمی‌باشد.',
   },
+  roles: {
+    select: 'انتخاب نقش',
+    title: 'نقش کاربری',
+  },
   nav: {
     home: 'صفحه اصلی',
     processes: 'فرایندها',
@@ -53,6 +57,16 @@ export const fa = {
   },
   placeholder: {
     inProgress: 'این بخش در حال آماده‌سازی است.',
+  },
+  knowledge: {
+    status: 'وضعیت سرویس دانش سازمانی',
+    configured: 'پیکربندی شده',
+    notConfigured: 'پیکربندی نشده',
+  },
+  speech: {
+    status: 'وضعیت سرویس گفتار به متن',
+    configured: 'فعال',
+    notAvailableNotice: 'سرویس گفتار به متن در حال حاضر در دسترس نمی‌باشد.',
   },
   errors: {
     default: 'خطایی در پردازش اطلاعات رخ داد. لطفاً مجدداً تلاش نمایید.',

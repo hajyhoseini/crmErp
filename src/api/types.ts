@@ -34,8 +34,17 @@ export interface RolesCheckResponse {
   data: RolesCheckData;
 }
 
+export interface ServiceStateData {
+  configured: boolean;
+}
+
+export interface ServiceStateResponse {
+  data?: ServiceStateData;
+  configured?: boolean;
+}
+
 export interface ApiErrorBody {
-  errors?: Array<{ message?: string }>;
+  errors?: Array<{ message?: string; code?: string; [key: string]: unknown }>;
   message?: string;
   error?: string;
   [key: string]: unknown;

@@ -4,3 +4,4 @@ export * from './useCan';
 export * from './Can';
 export * from './ProtectedRoute';
 export * from './token';
+export * from './role';

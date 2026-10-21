@@ -15,7 +15,9 @@ export default defineConfig({
     host: 'localhost',
     proxy: {
       '/api': {
-        target: 'http://localhost:13000',
+        target: 'https://smartbase.ir',
+        changeOrigin: true,
+        headers: { Origin: 'https://smartbase.ir', Referer: 'https://smartbase.ir/' },
       },
     },
   },
