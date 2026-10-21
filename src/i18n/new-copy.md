@@ -65,3 +65,21 @@
 | `forbiddenPage.title` | عدم دسترسی (۴۰۳) | Access Denied (403) |
 | `forbiddenPage.subtitle` | شما مجوز دسترسی به این بخش را ندارید. | You do not have permission to access this section. |
 | `forbiddenPage.backHome` | بازگشت به صفحه اصلی | Return to Home |
+| `devProbe.title` | بررسی پاسخهای سرور | Check Server Responses |
+| `devProbe.subtitle` | ابزار توسعه برای بررسی ساختار پاسخ‌های نقاط پایانی سرور | Development tool to inspect server endpoint response structures |
+| `devProbe.runAll` | اجرای همه | Run All |
+| `devProbe.running` | در حال اجرا... | Running... |
+| `devProbe.runSingle` | اجرا | Run |
+| `devProbe.endpoint` | نقطه پایانی | Endpoint |
+| `devProbe.status` | وضعیت HTTP | HTTP Status |
+| `devProbe.errorCode` | کد خطا | Error Code |
+| `devProbe.duration` | مدت زمان | Duration |
+| `devProbe.ms` | میلی‌ثانیه | Milliseconds |
+| `devProbe.showJson` | نمایش JSON | Show JSON |
+| `devProbe.copyJson` | کپی JSON | Copy JSON |
+| `devProbe.copySuccess` | پاسخ کامل در حافظه موقت کپی شد. | Full response copied to clipboard. |
+| `devProbe.copyFailed` | کپی در حافظه موقت با خطا مواجه شد. | Failed to copy to clipboard. |
+| `devProbe.continued` | ادامه دارد | Continued |
+| `devProbe.notRunYet` | اجرا نشده | Not run yet |
+| `devProbe.modalTitle` | پاسخ دریافتی نقطه پایانی | Endpoint Response |
+| `devProbe.close` | بستن | Close |

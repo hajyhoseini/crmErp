@@ -11,8 +11,14 @@ import { PlaceholderPage } from './pages/PlaceholderPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ForbiddenState } from './components/ForbiddenState';
 import { fa } from './i18n/fa';
+import ProbePage from './dev/ProbePage';
 
 export const AppRoutes: React.FC = () => {
+  let devRoute: React.ReactNode = null;
+  if (import.meta.env.DEV) {
+    devRoute = <Route path="dev/probe" element={<ProbePage />} />;
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -73,6 +79,7 @@ export const AppRoutes: React.FC = () => {
             </Can>
           }
         />
+        {devRoute}
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

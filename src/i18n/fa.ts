@@ -88,6 +88,26 @@ export const fa = {
     subtitle: 'شما مجوز دسترسی به این بخش را ندارید.',
     backHome: 'بازگشت به صفحه اصلی',
   },
+  devProbe: {
+    title: 'بررسی پاسخهای سرور',
+    subtitle: 'ابزار توسعه برای بررسی ساختار پاسخ‌های نقاط پایانی سرور',
+    runAll: 'اجرای همه',
+    running: 'در حال اجرا...',
+    runSingle: 'اجرا',
+    endpoint: 'نقطه پایانی',
+    status: 'وضعیت HTTP',
+    errorCode: 'کد خطا',
+    duration: 'مدت زمان',
+    ms: 'میلی‌ثانیه',
+    showJson: 'نمایش JSON',
+    copyJson: 'کپی JSON',
+    copySuccess: 'پاسخ کامل در حافظه موقت کپی شد.',
+    copyFailed: 'کپی در حافظه موقت با خطا مواجه شد.',
+    continued: 'ادامه دارد',
+    notRunYet: 'اجرا نشده',
+    modalTitle: 'پاسخ دریافتی نقطه پایانی',
+    close: 'بستن',
+  },
 } as const;
 
 export type Translation = typeof fa;
